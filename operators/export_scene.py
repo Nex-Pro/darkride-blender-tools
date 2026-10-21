@@ -135,7 +135,7 @@ class ExportScene(bpy.types.Operator):
 
 			scale = obj.matrix_world.to_scale()
 			if scale.x < 0 or scale.y < 0 or scale.z < 0:
-				utils.select_only(obj)
+				utils.select_only(obj, context)
 				raise Exception(
 				    obj.name +
 				    " has a negative scale which is not supported in Tivoli"
@@ -160,7 +160,7 @@ class ExportScene(bpy.types.Operator):
 				continue
 
 			if obj.type == "EMPTY" and obj.instance_type == "COLLECTION":
-				utils.select_only(obj)
+				utils.select_only(obj, context)
 
 				bpy.ops.object.duplicate()  # changes selection
 				for obj in context.selected_objects:
@@ -190,7 +190,7 @@ class ExportScene(bpy.types.Operator):
 
 			# tivoli doesn't render loose vertices so remove them
 			# note, this happens on the object in the scene which is destructive
-			utils.select_only(obj)
+			utils.select_only(obj, context)
 			bpy.ops.object.mode_set(mode="EDIT")
 			bpy.ops.mesh.select_all(action="SELECT")
 			bpy.ops.mesh.delete_loose(
@@ -213,7 +213,7 @@ class ExportScene(bpy.types.Operator):
 				export_object = bpy.data.objects.new(utils.tivoli_uuid(), mesh)
 				context.collection.objects.link(export_object)
 
-				utils.select_only(export_object)
+				utils.select_only(export_object, context)
 
 				# remove doubles from mesh
 				bpy.ops.object.mode_set(mode="EDIT")
@@ -266,10 +266,10 @@ class ExportScene(bpy.types.Operator):
 			)
 
 		for obj in instanced_objects:
-			utils.select_only(obj)
+			utils.select_only(obj, context)
 			bpy.ops.object.delete()
 
-		utils.deselect_all()
+		utils.deselect_all(context)
 
 		# write to json
 		filepath = os.path.join(project_export_dir, project_name) + ".json"
