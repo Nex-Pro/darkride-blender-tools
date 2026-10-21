@@ -8,21 +8,11 @@ Exports a folder with a Darkride compatible JSON file along with the individual 
 
 ### You can find the latest releases here:
 
-https://git.tivolicloud.com/tivolicloud/blender-tools/-/releases
-
-### And the changelog here:
-
-https://docs.tivolicloud.com/blender-tools/changelog
+https://github.com/Nex-Pro/darkride-blender-tools/releases/tag/Blender_Add_On
 
 ## Installation
 
-No compiled releases exist yet so you have to do it manually.
-
--   ```bash
-    python download_libs.py
-    ```
-
--   Then load the repo dir as addon in Blender using a symbolic link.
+Download the zip file and install from zip file in blender addons panel.
 
 ## Blender compatibility
 
