@@ -177,8 +177,6 @@ class LightmapBakeScene(bpy.types.Operator):
 		scene = context.scene
 
 		scene.render.engine = "CYCLES"
-		scene.render.tile_x = 8192
-		scene.render.tile_y = 8192
 		scene.cycles.device = "GPU"
 		if scene.cycles.samples > 32:
 			raise Exception("Samples should be less than 32")

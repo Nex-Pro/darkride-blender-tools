@@ -20,6 +20,12 @@ No compiled releases exist yet so you have to do it manually.
 
 -   Then load the repo dir as addon in Blender using a symbolic link.
 
+## Blender compatibility
+
+The add-on targets Blender 4.2 and newer, including Blender 5.x. The glTF
+export features require Blender's glTF 2.0 importer/exporter add-on to be
+installed and enabled.
+
 ## Developing
 
 I recommend you use this extension for developing on VSCode:

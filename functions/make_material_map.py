@@ -5,6 +5,44 @@ from typing import Union
 from .tivoli_settings_node import *
 from .. import utils
 
+
+def get_bsdf_input(bsdf, name):
+	renamed_inputs = {
+	    "Subsurface": "Subsurface Weight",
+	    "Emission": "Emission Color",
+	}
+	socket = bsdf.inputs.get(name)
+	if socket is None and name in renamed_inputs:
+		socket = bsdf.inputs.get(renamed_inputs[name])
+	if socket is None:
+		raise KeyError("Principled BSDF input not found: " + name)
+	return socket
+
+
+def get_opacity_map_mode(material, bsdf=None):
+	blend_method = getattr(material, "blend_method", None)
+	if blend_method is not None:
+		if blend_method == "OPAQUE":
+			return "OPACITY_MAP_OPAQUE"
+		if blend_method == "CLIP":
+			return "OPACITY_MAP_MASK"
+		if blend_method in {"HASHED", "BLEND"}:
+			return "OPACITY_MAP_BLEND"
+
+	if material.surface_render_method == "BLENDED":
+		return "OPACITY_MAP_BLEND"
+
+	# Blender 4.2+ combines the older opaque, clip, and hashed modes into
+	# DITHERED. Use blending when the Principled Alpha input is in use.
+	if bsdf is not None:
+		alpha = bsdf.inputs.get("Alpha")
+		if alpha is not None and (
+		    alpha.is_linked or alpha.default_value < 1.0
+		):
+			return "OPACITY_MAP_BLEND"
+	return "OPACITY_MAP_OPAQUE"
+
+
 def color_to_tivoli(color):
 	# false means disable srgb so it's linear
 	return [color[0], color[1], color[2], False]
@@ -88,11 +126,11 @@ def make_material_map(objects, to_webp=False):
 				if tivoli and use_tivoli:
 					node_input = tivoli.inputs[input_key]
 				else:
-					node_input = bsdf.inputs[input_key]
+					node_input = get_bsdf_input(bsdf, input_key)
 
 				def set_image(image):
 					filepath = image.filepath
-					filename = re.split("[\\/\\\]", filepath).pop()
+					filename = re.split(r"[\\/]", filepath).pop()
 
 					if to_webp:
 						old_filename = filename
@@ -137,7 +175,7 @@ def make_material_map(objects, to_webp=False):
 
 				if unlit_texture != None:
 					filepath = unlit_texture.image.filepath
-					filename = re.split("[\\/\\\]", filepath).pop()
+					filename = re.split(r"[\\/]", filepath).pop()
 
 					if to_webp:
 						old_filename = filename
@@ -162,13 +200,14 @@ def make_material_map(objects, to_webp=False):
 					process("value", "Occlusion", "occlusion", True, True)
 					# process("value", "Lightmap", "light", True, True)
 
-			if material.blend_method == "OPAQUE":
-				material_data["opacityMapMode"] = "OPACITY_MAP_OPAQUE"
-			elif material.blend_method == "CLIP":
-				material_data["opacityMapMode"] = "OPACITY_MAP_MASK"
+			material_data["opacityMapMode"] = get_opacity_map_mode(
+			    material, bsdf
+			)
+			if (
+			    getattr(material, "blend_method", None) == "CLIP" and
+			    hasattr(material, "alpha_threshold")
+			):
 				material_data["opacityCutoff"] = material.alpha_threshold
-			elif material.blend_method == "HASHED" or material.blend_method == "BLEND":
-				material_data["opacityMapMode"] = "OPACITY_MAP_BLEND"
 
 			if material.use_backface_culling:
 				material_data["cullFaceMode"] = "CULL_BACK"

@@ -1,5 +1,8 @@
 import bpy
 
+from .node_group_interface import add_input_socket
+
+
 def get_tivoli_settings_node_name():
 	return "Tivoli Settings"
 
@@ -12,7 +15,7 @@ def get_tivoli_settings_node():
 		# create a new node group
 		node_group = bpy.data.node_groups.new(node_group_name, "ShaderNodeTree")
 
-		node_group.inputs.new("NodeSocketFloat", "Occlusion")
+		add_input_socket(node_group, "NodeSocketFloat", "Occlusion")
 		# node_group.inputs.new("NodeSocketFloat", "Lightmap")
 
 		node_group.nodes.new("NodeGroupOutput")

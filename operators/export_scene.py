@@ -129,7 +129,7 @@ class ExportScene(bpy.types.Operator):
 		for obj in scene.objects:
 			if (
 			    obj.visible_get() == False or
-			    obj.cycles_visibility.camera == False
+			    not utils.is_camera_visible(obj)
 			):
 				continue
 
@@ -148,7 +148,7 @@ class ExportScene(bpy.types.Operator):
 		for obj in scene.objects:
 			if (
 			    obj.visible_get() == False or
-			    obj.cycles_visibility.camera == False
+			    not utils.is_camera_visible(obj)
 			):
 				continue
 
@@ -218,14 +218,17 @@ class ExportScene(bpy.types.Operator):
 				# remove doubles from mesh
 				bpy.ops.object.mode_set(mode="EDIT")
 				bpy.ops.mesh.select_all(action="SELECT")
-				bpy.ops.mesh.remove_doubles(threshold=0.0001)
+				if bpy.app.version >= (2, 90, 0):
+					bpy.ops.mesh.merge_by_distance(threshold=0.0001)
+				else:
+					bpy.ops.mesh.remove_doubles(threshold=0.0001)
 				bpy.ops.mesh.select_all(action="DESELECT")
 				bpy.ops.object.mode_set(mode="OBJECT")
 
 				bpy.ops.export_scene.gltf(
 				    filepath=mesh_filepath,
 				    export_format="GLTF_SEPARATE",
-				    export_selected=True,
+				    use_selection=True,
 				    export_apply=True,
 				    # TODO: duplicate image names will overwrite each other
 				    export_texture_dir=textures_dir

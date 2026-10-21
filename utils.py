@@ -7,33 +7,60 @@ from math import pi
 
 def is_obj_bakeable(obj):
 	return (
-	    obj.visible_get() and obj.cycles_visibility.camera == True and
+	    obj.visible_get() and is_camera_visible(obj) and
 	    obj.type == "MESH"
 	)
 
+
+def is_camera_visible(obj):
+	if hasattr(obj, "visible_camera"):
+		return obj.visible_camera
+	return obj.cycles_visibility.camera
+
+
 def get_context_with_area(areaType, context=bpy.context):
 	# https://docs.blender.org/api/current/bpy.types.Area.html#bpy.types.Area.type
-	for window in bpy.context.window_manager.windows:
+	for window in context.window_manager.windows:
 		screen = window.screen
 		for area in screen.areas:
 			if area.type == areaType:
-				return {"window": window, "screen": screen, "area": area}
+				override = {
+				    "window": window,
+				    "screen": screen,
+				    "area": area,
+				}
+				region = next(
+				    (region for region in area.regions
+				     if region.type == "WINDOW"), None
+				)
+				if region is not None:
+					override["region"] = region
+				return override
 	return None
 
 def select_all(context=bpy.context):
-	bpy.ops.object.select_all(
-	    get_context_with_area("VIEW_3D", context), action="SELECT"
-	)
+	for obj in context.view_layer.objects:
+		obj.select_set(state=True)
 
 def deselect_all(context=bpy.context):
-	bpy.ops.object.select_all(
-	    get_context_with_area("VIEW_3D", context), action="DESELECT"
-	)
+	for obj in context.view_layer.objects:
+		obj.select_set(state=False)
 
 def deselect_all_outliner(context=bpy.context):
-	bpy.ops.outliner.select_all(
-	    get_context_with_area("OUTLINER", context), action="DESELECT"
-	)
+	override = get_context_with_area("OUTLINER", context)
+	if override is None:
+		return
+
+	if bpy.app.version >= (4, 0, 0):
+		kwargs = {
+		    key: override[key]
+		    for key in ("window", "area", "region")
+		    if key in override
+		}
+		with context.temp_override(**kwargs):
+			bpy.ops.outliner.select_all(action="DESELECT")
+	else:
+		bpy.ops.outliner.select_all(override, action="DESELECT")
 
 def select_only(obj):
 	deselect_all()

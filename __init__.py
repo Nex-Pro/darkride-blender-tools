@@ -3,14 +3,13 @@ bl_info = {
     "author": "Tivoli Cloud VR, Inc.",
     "description": "",
     "version": (0, 0, 0),
-    "blender": (2, 82, 0),
-    "location": "View 3D > Tool Shelf > Tivoli",
+    "blender": (4, 2, 0),
+    "location": "View 3D > Sidebar > Tivoli",
     "warning": "",
     "category": "3D View",
 }
 
 import bpy
-from bpy.utils import register_class, unregister_class
 
 from .settings import *
 
@@ -72,12 +71,8 @@ def menu_func_export(self, context):
 	)
 
 def register():
-	# main_register()
 	for cls in classes:
-		try:
-			bpy.utils.register_class(cls)
-		except Exception as e:
-			print("ERROR: Failed to register class {0}: {1}".format(cls, e))
+		bpy.utils.register_class(cls)
 
 	bpy.types.TOPBAR_MT_file_export.append(menu_func_export)
 
@@ -86,11 +81,8 @@ def register():
 	)
 
 def unregister():
-	# main_unregister()
-	for cls in classes:
-		try:
-			bpy.utils.unregister_class(cls)
-		except Exception as e:
-			print("ERROR: Failed to unregister class {0}: {1}".format(cls, e))
-
 	bpy.types.TOPBAR_MT_file_export.remove(menu_func_export)
+	del bpy.types.Scene.tivoli_settings
+
+	for cls in reversed(classes):
+		bpy.utils.unregister_class(cls)
