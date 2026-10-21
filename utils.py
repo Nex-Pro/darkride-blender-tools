@@ -18,8 +18,11 @@ def is_camera_visible(obj):
 	return obj.cycles_visibility.camera
 
 
-def get_context_with_area(areaType, context=bpy.context):
+def get_context_with_area(areaType, context=None):
 	# https://docs.blender.org/api/current/bpy.types.Area.html#bpy.types.Area.type
+	if context is None:
+		context = bpy.context
+
 	for window in context.window_manager.windows:
 		screen = window.screen
 		for area in screen.areas:
@@ -38,15 +41,24 @@ def get_context_with_area(areaType, context=bpy.context):
 				return override
 	return None
 
-def select_all(context=bpy.context):
+def select_all(context=None):
+	if context is None:
+		context = bpy.context
+
 	for obj in context.view_layer.objects:
 		obj.select_set(state=True)
 
-def deselect_all(context=bpy.context):
+def deselect_all(context=None):
+	if context is None:
+		context = bpy.context
+
 	for obj in context.view_layer.objects:
 		obj.select_set(state=False)
 
-def deselect_all_outliner(context=bpy.context):
+def deselect_all_outliner(context=None):
+	if context is None:
+		context = bpy.context
+
 	override = get_context_with_area("OUTLINER", context)
 	if override is None:
 		return
@@ -62,10 +74,13 @@ def deselect_all_outliner(context=bpy.context):
 	else:
 		bpy.ops.outliner.select_all(override, action="DESELECT")
 
-def select_only(obj):
-	deselect_all()
+def select_only(obj, context=None):
+	if context is None:
+		context = bpy.context
+
+	deselect_all(context)
 	obj.select_set(state=True)
-	bpy.context.view_layer.objects.active = obj
+	context.view_layer.objects.active = obj
 
 def find_material(name):
 	for mat in bpy.data.materials:
