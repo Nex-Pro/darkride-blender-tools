@@ -1,4 +1,4 @@
-# Tivoli Blender Tools
+# Darkride Blender Tools
 
 Updated to work with Blender 5.x. Might work with some 4.x versions.
 
