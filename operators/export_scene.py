@@ -218,10 +218,7 @@ class ExportScene(bpy.types.Operator):
 				# remove doubles from mesh
 				bpy.ops.object.mode_set(mode="EDIT")
 				bpy.ops.mesh.select_all(action="SELECT")
-				if bpy.app.version >= (2, 90, 0):
-					bpy.ops.mesh.merge_by_distance(threshold=0.0001)
-				else:
-					bpy.ops.mesh.remove_doubles(threshold=0.0001)
+				bpy.ops.mesh.remove_doubles(threshold=0.0001)
 				bpy.ops.mesh.select_all(action="DESELECT")
 				bpy.ops.object.mode_set(mode="OBJECT")
 
