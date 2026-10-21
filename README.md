@@ -1,5 +1,9 @@
 # Tivoli Blender Tools
 
+Updated to work with Blender 5.x. Might work with some 4.x versions.
+
+Exports a folder with a Darkride compatible JSON file along with the individual objects as discrete GLTFs.
+
 ## Download
 
 ### You can find the latest releases here:
